@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LightLearner</title>
+
+    <!-- Ladda A-Frame biblioteket -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <!-- Lägg till tom favicon här -->
+    <link rel="icon" href="data:," />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      /* Startskärm med Gaussian blur */
+      #startScreen {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background-image: url("https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/board%20vit%20light.png?v=1736874362023"); /* Lägg till din PNG här */
+        backdrop-filter: blur(10px); /* Gaussian blur */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* Se till att startskärmen är över spelet */
+        background-position: center center; /* Centrerar bilden både vertikalt och horisontellt */
+        background-size: cover; /* Gör så att bilden täcker hela skärmen */
+        background-attachment: fixed; /* Håller bakgrunden fixerad när du scrollar */
+        background-color: transparent; /* Se till att bakgrunden är transparent */
+      }
+
+      /* Styling för startknappen */
+      #startButton {
+        padding: 18px 60px;
+        font-size: 30px;
+        color: black;
+        border: black;
+        border-radius: 74px;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 0-4 2px 25px rgba(0, 0, 0, 0.6);
+        margin-top: 160px; /* Justera detta värde för att flytta knappen längre ner */
+        transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out; /* Lägg till denna rad för smooth transition */
+      }
+
+      #startButton:hover {
+        background-color: #d0d0d0; /* Hover-färg för knappen */
+        color: #000000; /* Du kan ändra färgen här om du vill */
+      }
+      "" a-scene {
+        display: none; /* Dölja scenen tills spelet startar */
+      }
+
+      /* Light Mode - default */
+      :root {
+        --background-color: #ffffff;
+        --text-color: #000000;
+        --button-background: #f0f0f0;
+        --button-text-color: #000000;
+      }
+
+      /* Dark Mode */
+      .dark-mode {
+        --background-color: #121212;
+        --text-color: #ffffff;
+        --button-background: #333333;
+        --button-text-color: #ffffff;
+      }
+
+      /* All elements use these variables */
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-family: Arial, sans-serif;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      button.toggle-btn {
+        background-color: var(--button-background);
+        color: var(--button-text-color);
+        border: none;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 50px;
+        transition: background-color 0.3s, color 0.3s;
+        position: absolute; /* Gör knappen positionerad absolut */
+        top: 20px; /* Placera knappen 20px från toppen */
+        left: 29px; /* Placera knappen 20px från vänster */
+        z-index: 9999; /* Sätt ett högt z-index för att säkerställa att knappen ligger ovanpå 3D-objekten */
+      }
+
+      button.toggle-btn:hover {
+        background-color: #ddd;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Startskärm -->
+    <div id="startScreen">
+      <button id="startButton">Start Lighting</button>
+    </div>
+
+    <button id="toggleModeBtn" class="toggle-btn">Light/Dark Mode</button>
+
+    <!-- A-Frame scen -->
+    <a-scene vr-mode-ui="enabled: false">
+      <a-assets>
+
+        <img id="skytexture" src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961">
+             
+        <a-asset-item
+          id="head"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/scene.glb?v=1736535733512"
+        ></a-asset-item>
+
+        <!-- Ladda ljusmodeller -->
+        <a-asset-item
+          id="light1"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/studio_softbox_light.glb?v=1736536565434"
+        ></a-asset-item>
+        <a-asset-item
+          id="light2"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/studio_softbox_light.glb?v=1736536565434"
+        ></a-asset-item>
+        <a-asset-item
+          id="light3"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/studio_softbox_light.glb?v=1736536565434"
+        ></a-asset-item>
+        <a-asset-item
+          id="light4"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/studio_softbox_light.glb?v=1736536565434"
+        ></a-asset-item>
+
+        <img
+          id="groundTexture"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/M103803961L_thumbs.png?v=1736867759515"
+        />
+
+        <!-- Ljud för bakgrund -->
+        <audio
+          id="backgroundMusic"
+          src="https://cdn.glitch.me/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/345851__hargissssound__spring-birds-raw-new-jersey.wav?v=1736724868922"
+          loop="true"
+          volume="0.5"
+        ></audio>
+
+        <!-- Ljud för att slå på/av lampor -->
+        <audio
+          id="toggleLightSound"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/333427__brandondelehoy__ui-series-gravel-y-click.wav?v=1736725049228"
+        ></audio>
+
+        <!-- Fyra ljud som ska slumpas vid lampflyttning -->
+        <audio
+          id="moveSound1"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/1.mp3?v=1736726039137"
+        ></audio>
+        <audio
+          id="moveSound2"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/2.mp3?v=1736726045411"
+        ></audio>
+        <audio
+          id="moveSound3"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/3.mp3?v=1736726048760"
+        ></audio>
+
+        <!-- Ljud för att slå på/av lampor (slumpat ljud) -->
+        <audio
+          id="toggleLightSound1"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/f1.wav?v=1736726927592"
+        ></audio>
+        <audio
+          id="toggleLightSound2"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/f2.wav?v=1736726935919"
+        ></audio>
+        <audio
+          id="toggleLightSound3"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/f3.wav?v=1736726941415"
+        ></audio>
+
+        <!-- Ljud för att spela vid klick på huvudet -->
+        <audio
+          id="headSound1"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s1.wav?v=1736727705334"
+        ></audio>
+        <audio
+          id="headSound2"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s2.wav?v=1736727714541"
+        ></audio>
+        <audio
+          id="headSound3"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s3.wav?v=1736727716185"
+        ></audio>
+        <audio
+          id="headSound4"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s4.wav?v=1736727720946"
+        ></audio>
+        <audio
+          id="headSound5"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s5.wav?v=1736727723272"
+        ></audio>
+        <audio
+          id="headSound6"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s6.wav?v=1736727751002"
+        ></audio>
+        <audio
+          id="headSound7"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s7.wav?v=1736727753560"
+        ></audio>
+        <audio
+          id="headSound8"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s8.wav?v=1736727758172"
+        ></audio>
+        <audio
+          id="headSound9"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s9.wav?v=1736728020506"
+        ></audio>
+        <audio
+          id="headSound10"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s10.wav?v=1736728023360"
+        ></audio>
+        <audio
+          id="headSound11"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/s11.wav?v=1736728027424"
+        ></audio>
+      </a-assets>
+
+      <!-- Lägg till en sky -->
+      <a-sky src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961"
+        animation="property: rotation; to: 0 360 0; loop: true; dur: 300000; easing: linear"
+        material="opacity: 0.5"
+             
+      >
+      </a-sky>
+
+      <!-- Ljuskällor -->
+      <a-light
+        type="ambient"
+        color="#ffffff"
+        intensity="0.1"
+        rotation="0 -65 0"
+        position="17 10 0"
+      ></a-light>
+
+      <!-- Lampor med spotlight -->
+      <a-entity
+        drag-drop="enabled: true"
+        click-drag="enabled: true"
+        id="light1Obj"
+        class="clickable"
+        gltf-model="#light1"
+        position="8 0 -6"
+        scale="0.0022 0.0022 0.0022"
+        event-set__dragstart="material.emissive: #ff0000; material.emissiveIntensity: 1"
+        event-set__dragend="material.emissive: #000000; material.emissiveIntensity: 0"
+      >
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#fff3ba"
+          intensity="0.1"
+          position="0 2 0"
+          rotation="17 -85 0"
+          angle="16"
+          penumbra="2"
+          distance="20"
+        ></a-light>
+
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#ffffff"
+          intensity="9"
+          position="0 0 0"
+          rotation="-90 0 0"
+          angle="45"
+        ></a-light>
+      </a-entity>
+
+      <a-entity
+        id="light2Obj"
+        class="clickable"
+        gltf-model="#light2"
+        position="5 0 -6"
+        scale="0.0022 0.0022 0.0022"
+      >
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#fff3ba"
+          intensity="0.1"
+          position="0 2 0"
+          rotation="17 -85 0"
+          angle="16"
+          penumbra="2"
+          distance="20"
+        ></a-light>
+
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#ffffff"
+          intensity="9"
+          position="0 0 0"
+          rotation="-90 0 0"
+          angle="45"
+        ></a-light>
+      </a-entity>
+
+      <a-entity
+        id="light3Obj"
+        class="clickable"
+        gltf-model="#light3"
+        position="2 0 -6"
+        scale="0.0022 0.0022 0.0022"
+      >
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#fff3ba"
+          intensity="0.1"
+          position="0 2 0"
+          rotation="17 -85 0"
+          angle="16"
+          penumbra="2"
+          distance="20"
+        ></a-light>
+
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#ffffff"
+          intensity="9"
+          position="0 0 0"
+          rotation="-90 0 0"
+          angle="45"
+        ></a-light>
+      </a-entity>
+
+      <a-entity
+        id="light4Obj"
+        class="clickable"
+        gltf-model="#light4"
+        position="11 0 -6"
+        scale="0.0022 0.0022 0.0022"
+      >
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#fff3ba"
+          intensity="0.1"
+          position="0 2 0"
+          rotation="17 -85 0"
+          angle="16"
+          penumbra="2"
+          distance="20"
+        ></a-light>
+
+        <a-light
+          type="spot"
+          castshadow="true"
+          color="#ffffff"
+          intensity="9"
+          position="0 0 0"
+          rotation="-90 0 0"
+          angle="45"
+        ></a-light>
+      </a-entity>
+
+      <!-- Head-objektet -->
+      <a-entity
+        id="headObj"
+        gltf-model="#head"
+        position="0 1.4 -3"
+        scale="0.063 0.06 0.06"
+      ></a-entity>
+
+      <!-- Kamera -->
+      <a-camera
+        id="camera"
+        wasd-controls="enabled: true; acceleration: 45; deceleration: 0"
+        look-controls="pointerLockEnabled: true; sensitivity: 0.005"
+        position="0 1.2 8"
+        rotation="0 0 0"
+      >
+        <a-cursor color="white" raycaster="objects: .clickable"></a-cursor>
+      </a-camera>
+
+      <!-- Markplan -->
+      <a-plane
+        id="groundplate"
+        src="#groundTexture"
+        rotation="-90 0 0"
+        width="500"
+        height="500"
+        position="0 0 0"
+        class="clickable"
+        repeat="400 400"
+        material="roughness: -10; metalness: 0; env-map: #skyTexture; opacity: 0.5;"            
+    ></a-plane>
+    </a-scene>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+  // Hämta alla text-element som ska kunna klickas på
+  const texts = document.querySelectorAll("a-text.clickable");
+
+  // Gå igenom varje text och lägg till en klick-händelse
+  texts.forEach(function (textElement) {
+    textElement.addEventListener("click", function () {
+      // Ändra färgen på den klickade texten till svart
+      textElement.setAttribute("color", "#000000");
+    });
+  });
+
+  // Hämta elementen
+  const startButton = document.getElementById("startButton");
+  const startScreen = document.getElementById("startScreen");
+  const aScene = document.querySelector("a-scene");
+  const backgroundMusic = document.getElementById("backgroundMusic");
+
+  // Hämta alla ljudfiler för huvudet
+  const headSounds = [
+    document.querySelector("#headSound1"),
+    document.querySelector("#headSound2"),
+    document.querySelector("#headSound3"),
+    document.querySelector("#headSound4"),
+    document.querySelector("#headSound5"),
+    document.querySelector("#headSound6"),
+    document.querySelector("#headSound7"),
+    document.querySelector("#headSound8"),
+    document.querySelector("#headSound9"),
+    document.querySelector("#headSound10"),
+    document.querySelector("#headSound11"),
+  ];
+
+  // Funktion för att spela ett slumpmässigt ljud
+  const playRandomHeadSound = () => {
+    const randomIndex = Math.floor(Math.random() * headSounds.length);
+    const randomSound = headSounds[randomIndex];
+
+    console.log("Spelar ljud:", randomSound.id); // Felsökning: logga vilket ljud som spelas
+
+    if (randomSound.readyState >= 3) {
+      randomSound.currentTime = 0;
+      randomSound.play();
+    } else {
+      randomSound.addEventListener("canplaythrough", () => {
+        randomSound.currentTime = 0;
+        randomSound.play();
+      });
+    }
+  };
+
+  // Huvudet klickhändelse
+  const headObj = document.querySelector("#headObj");
+  headObj.addEventListener("click", () => {
+    console.log("Huvudet klickades!"); // Felsökning: logga när huvudet klickas
+    playRandomHeadSound();
+  });
+
+  // När startknappen klickas
+  startButton.addEventListener("click", function () {
+    // Dölj startskärmen och visa scenen
+    startScreen.style.display = "none";
+    aScene.style.display = "block";
+
+    // Starta bakgrundsmusik
+    backgroundMusic.play();
+  });
+
+  // Ljus och lampor logik
+  const lights = [
+    { obj: document.querySelector("#light1Obj") },
+    { obj: document.querySelector("#light2Obj") },
+    { obj: document.querySelector("#light3Obj") },
+    { obj: document.querySelector("#light4Obj") },
+  ];
+
+  const moveSounds = [
+    document.querySelector("#moveSound1"),
+    document.querySelector("#moveSound2"),
+    document.querySelector("#moveSound3"),
+  ];
+  const toggleLightSounds = [
+    document.querySelector("#toggleLightSound1"),
+    document.querySelector("#toggleLightSound2"),
+    document.querySelector("#toggleLightSound3"),
+  ];
+
+  let selectedLight = null;
+  let numLightsOn = 0; // Håll koll på antalet tända lampor
+
+  // Funktion för att uppdatera flikens titel
+  const updateTabTitle = () => {
+    const lampWord = numLightsOn === 1 ? "studiolamp" : "studiolampor";
+    document.title = `Light Learner – ${numLightsOn} ${lampWord}`;
+  };
+
+  // Funktion för att spela ett slumpmässigt ljud när lampan flyttas
+  const playRandomMoveSound = () => {
+    const randomIndex = Math.floor(Math.random() * moveSounds.length);
+    const randomSound = moveSounds[randomIndex];
+    randomSound.currentTime = 0; // Återställ ljudet för att börja om
+    randomSound.play();
+  };
+
+  // Funktion för att spela ett slumpmässigt ljud när lampan slås på/av
+  const playRandomToggleLightSound = () => {
+    const randomIndex = Math.floor(
+      Math.random() * toggleLightSounds.length
+    );
+    const randomSound = toggleLightSounds[randomIndex];
+    randomSound.currentTime = 0; // Återställ ljudet för att börja om
+    randomSound.play();
+  };
+
+  // Funktion för att slå på/av ljus
+  const toggleLight = (lightEntity) => {
+    const lightComponent = lightEntity.querySelector("a-light");
+    const isOn = lightComponent.getAttribute("intensity") > 0;
+    const animation = {
+      property: "intensity",
+      to: isOn ? 0 : 1.5,
+      dur: 250,
+    };
+    lightComponent.setAttribute("animation", animation);
+
+    // Uppdatera antalet tända lampor
+    numLightsOn = lights.filter(light => light.obj.querySelector("a-light").getAttribute("intensity") > 0).length;
+
+    // Uppdatera flikens titel
+    updateTabTitle();
+
+    // Spela ljud när ljuset slås på/av
+    playRandomToggleLightSound();
+  };
+
+  // Funktion för att flytta valda lampan med animation
+  const moveLight = (lightEntity, position) => {
+    const currentY = lightEntity.object3D.position.y;
+    const targetPosition = { x: position.x, y: currentY, z: position.z };
+
+    // Lägg till animation på lampan
+    lightEntity.setAttribute("animation", {
+      property: "position",
+      to: targetPosition,
+      dur: 1000,
+      easing: "easeInOutQuad",
+    });
+
+    // Spela ett slumpmässigt ljud när lampan flyttas
+    playRandomMoveSound();
+  };
+
+  // Funktion för att rotera lampan
+  const rotateLight = (lightEntity, angle) => {
+    lightEntity.object3D.rotation.y += angle;
+    // Spela ljud när lampan roteras
+    playRandomMoveSound();
+  };
+
+  // Klickhändelser för lamporna
+  lights.forEach(({ obj }) => {
+    obj.addEventListener("click", () => {
+      selectedLight = obj;
+      toggleLight(obj); // Växla ljuset
+    });
+  });
+
+  // Flytta lampor vid klick på markplan
+  const plane = document.querySelector("a-plane");
+  plane.addEventListener("click", (event) => {
+    if (selectedLight) {
+      const hitPoint = event.detail.intersection.point;
+      moveLight(selectedLight, hitPoint);
+    }
+  });
+
+  // Hantera tangenttryckningar för att rotera lamporna
+  window.addEventListener("keydown", (event) => {
+    if (!selectedLight) return;
+
+    const rotationAngle = Math.PI / 12; // 30 grader
+
+    if (event.key === "q") {
+      rotateLight(selectedLight, rotationAngle); // Rotera moturs
+    } else if (event.key === "e") {
+      rotateLight(selectedLight, -rotationAngle); // Rotera medurs
+    }
+  });
+
+  // Lägg till eventlyssnare för knappen
+  toggleModeBtn.addEventListener("click", function () {
+    // Växla klassen mellan light mode och dark mode
+    document.body.classList.toggle("dark-mode");
+
+    // Spara läget i localStorage
+    const darkModeEnabled = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", darkModeEnabled);
+
+    // Uppdatera knappen text baserat på läget
+    if (darkModeEnabled) {
+      toggleModeBtn.textContent = "Light Mode";
+    } else {
+      toggleModeBtn.textContent = "Dark Mode";
+    }
+
+    // Hitta sky och ground-elementen
+    const sky = document.querySelector('a-sky');
+    const groundPlane = document.querySelector('#groundPlane');
+
+    // Uppdatera sky opacity beroende på mode
+    if (darkModeEnabled) {
+      sky.setAttribute('material', 'opacity', '0.5');
+      // För markplanet (ground), sätt en mörkare färg i dark mode
+      groundPlane.setAttribute('material', 'opacity', '0.5');
+      groundPlane.setAttribute('material', 'color', '#121212'); // Mörk färg för dark mode
+    } else {
+      sky.setAttribute('material', 'opacity', '0.5');
+      // För markplanet (ground), sätt en ljusare färg i light mode
+      groundPlane.setAttribute('material', 'opacity', '0.5');
+      groundPlane.setAttribute('material', 'color', '#ffffff'); // Ljus färg för light mode
+    }
+  });
+
+  // Initial uppdatering av titeln
+  updateTabTitle();
+});
+
+    </script>
+  </body>
+</html>
