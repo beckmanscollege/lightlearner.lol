@@ -9,14 +9,73 @@
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
     <!-- Lägg till tom favicon här -->
-    <link rel="icon" href="data:," />
+    <link rel="icon" href="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/favicon.ico?v=1737022279863" type="image/x-icon" />
 
     <style>
+      /* För mobiler */
+      @media (max-width: 600px) {
+        body {
+          font-size: 14px;
+        }
+      }
+
+      /* För surfplattor */
+      @media (min-width: 601px) and (max-width: 1024px) {
+        body {
+          font-size: 16px;
+        }
+      }
+
+      /* För datorer */
+      @media (min-width: 1025px) {
+        body {
+          font-size: 18px;
+        }
+      }
+
       body {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
         overflow: hidden;
+      }
+
+      .inst {
+        position: relative;
+        top: 655px;
+        left: 70px;
+      }
+
+      #knapp1 {
+        position: absolute;
+        top: 20px;
+        left: 1300px;
+        border-radius: 30px;
+        cursor: pointer;
+        border: none;
+        z-index: 10001;
+        padding: 10px;
+        cursor: pointer; /* Pekare vid hovring */
+        transition: background-color 0.3s ease; /* Smidig övergång för bakgrundsfärg */
+      }
+
+      #knapp2 {
+        position: absolute;
+        top: 20px;
+        left: 1180px;
+        border-radius: 30px;
+        cursor: pointer;
+        border: none;
+        z-index: 10002;
+        padding: 10px;
+        cursor: pointer; /* Pekare vid hovring */
+        transition: background-color 0.3s ease; /* Smidig övergång för bakgrundsfärg */
+      }
+
+      /* Hover-effekt för alla knappar */
+      button:hover {
+        background-color: #d0d0d0;
+        color: #000000;
       }
 
       /* Startskärm med Gaussian blur */
@@ -105,7 +164,17 @@
     </style>
   </head>
 
+  <p class="inst">
+    W-A-S-D to walk <br />
+    Q-E to rotate lights <br />
+    Click to Turn On / Move lights
+  </p>
+
   <body>
+    <button id="knapp1" onclick="goToPage1()">Next Web</button>
+
+    <button id="knapp2" onclick="goToPage2()">Previous Web</button>
+
     <!-- Startskärm -->
     <div id="startScreen">
       <button id="startButton">Start Lighting</button>
@@ -116,9 +185,11 @@
     <!-- A-Frame scen -->
     <a-scene vr-mode-ui="enabled: false">
       <a-assets>
+        <img
+          id="skytexture"
+          src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961"
+        />
 
-        <img id="skytexture" src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961">
-             
         <a-asset-item
           id="head"
           src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/scene.glb?v=1736535733512"
@@ -237,10 +308,10 @@
       </a-assets>
 
       <!-- Lägg till en sky -->
-      <a-sky src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961"
+      <a-sky
+        src="https://cdn.glitch.global/d4c6f3e2-f0dd-4443-b8ab-abe77468ba66/nightsky.jpeg?v=1736859583961"
         animation="property: rotation; to: 0 360 0; loop: true; dur: 300000; easing: linear"
         material="opacity: 0.5"
-             
       >
       </a-sky>
 
@@ -407,238 +478,250 @@
         position="0 0 0"
         class="clickable"
         repeat="400 400"
-        material="roughness: -10; metalness: 0; env-map: #skyTexture; opacity: 0.5;"            
-    ></a-plane>
+        material="roughness: -10; metalness: 0; env-map: #skyTexture; opacity: 0.5;"
+      ></a-plane>
     </a-scene>
 
     <script>
+      function goToPage1() {
+        // Länka till den första sidan
+        window.location.href = "http://tellmyfuture.se/";
+      }
+
+      function goToPage2() {
+        // Länka till den andra sidan
+        window.location.href = "https://github.com/vemodig";
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
-  // Hämta alla text-element som ska kunna klickas på
-  const texts = document.querySelectorAll("a-text.clickable");
+        // Hämta alla text-element som ska kunna klickas på
+        const texts = document.querySelectorAll("a-text.clickable");
 
-  // Gå igenom varje text och lägg till en klick-händelse
-  texts.forEach(function (textElement) {
-    textElement.addEventListener("click", function () {
-      // Ändra färgen på den klickade texten till svart
-      textElement.setAttribute("color", "#000000");
-    });
-  });
+        // Gå igenom varje text och lägg till en klick-händelse
+        texts.forEach(function (textElement) {
+          textElement.addEventListener("click", function () {
+            // Ändra färgen på den klickade texten till svart
+            textElement.setAttribute("color", "#000000");
+          });
+        });
 
-  // Hämta elementen
-  const startButton = document.getElementById("startButton");
-  const startScreen = document.getElementById("startScreen");
-  const aScene = document.querySelector("a-scene");
-  const backgroundMusic = document.getElementById("backgroundMusic");
+        // Hämta elementen
+        const startButton = document.getElementById("startButton");
+        const startScreen = document.getElementById("startScreen");
+        const aScene = document.querySelector("a-scene");
+        const backgroundMusic = document.getElementById("backgroundMusic");
 
-  // Hämta alla ljudfiler för huvudet
-  const headSounds = [
-    document.querySelector("#headSound1"),
-    document.querySelector("#headSound2"),
-    document.querySelector("#headSound3"),
-    document.querySelector("#headSound4"),
-    document.querySelector("#headSound5"),
-    document.querySelector("#headSound6"),
-    document.querySelector("#headSound7"),
-    document.querySelector("#headSound8"),
-    document.querySelector("#headSound9"),
-    document.querySelector("#headSound10"),
-    document.querySelector("#headSound11"),
-  ];
+        // Hämta alla ljudfiler för huvudet
+        const headSounds = [
+          document.querySelector("#headSound1"),
+          document.querySelector("#headSound2"),
+          document.querySelector("#headSound3"),
+          document.querySelector("#headSound4"),
+          document.querySelector("#headSound5"),
+          document.querySelector("#headSound6"),
+          document.querySelector("#headSound7"),
+          document.querySelector("#headSound8"),
+          document.querySelector("#headSound9"),
+          document.querySelector("#headSound10"),
+          document.querySelector("#headSound11"),
+        ];
 
-  // Funktion för att spela ett slumpmässigt ljud
-  const playRandomHeadSound = () => {
-    const randomIndex = Math.floor(Math.random() * headSounds.length);
-    const randomSound = headSounds[randomIndex];
+        // Funktion för att spela ett slumpmässigt ljud
+        const playRandomHeadSound = () => {
+          const randomIndex = Math.floor(Math.random() * headSounds.length);
+          const randomSound = headSounds[randomIndex];
 
-    console.log("Spelar ljud:", randomSound.id); // Felsökning: logga vilket ljud som spelas
+          console.log("Spelar ljud:", randomSound.id); // Felsökning: logga vilket ljud som spelas
 
-    if (randomSound.readyState >= 3) {
-      randomSound.currentTime = 0;
-      randomSound.play();
-    } else {
-      randomSound.addEventListener("canplaythrough", () => {
-        randomSound.currentTime = 0;
-        randomSound.play();
+          if (randomSound.readyState >= 3) {
+            randomSound.currentTime = 0;
+            randomSound.play();
+          } else {
+            randomSound.addEventListener("canplaythrough", () => {
+              randomSound.currentTime = 0;
+              randomSound.play();
+            });
+          }
+        };
+
+        // Huvudet klickhändelse
+        const headObj = document.querySelector("#headObj");
+        headObj.addEventListener("click", () => {
+          console.log("Huvudet klickades!"); // Felsökning: logga när huvudet klickas
+          playRandomHeadSound();
+        });
+
+        // När startknappen klickas
+        startButton.addEventListener("click", function () {
+          // Dölj startskärmen och visa scenen
+          startScreen.style.display = "none";
+          aScene.style.display = "block";
+
+          // Starta bakgrundsmusik
+          backgroundMusic.play();
+        });
+
+        // Ljus och lampor logik
+        const lights = [
+          { obj: document.querySelector("#light1Obj") },
+          { obj: document.querySelector("#light2Obj") },
+          { obj: document.querySelector("#light3Obj") },
+          { obj: document.querySelector("#light4Obj") },
+        ];
+
+        const moveSounds = [
+          document.querySelector("#moveSound1"),
+          document.querySelector("#moveSound2"),
+          document.querySelector("#moveSound3"),
+        ];
+        const toggleLightSounds = [
+          document.querySelector("#toggleLightSound1"),
+          document.querySelector("#toggleLightSound2"),
+          document.querySelector("#toggleLightSound3"),
+        ];
+
+        let selectedLight = null;
+        let numLightsOn = 0; // Håll koll på antalet tända lampor
+
+        // Funktion för att uppdatera flikens titel
+        const updateTabTitle = () => {
+          const lampWord = numLightsOn === 1 ? "studiolamp" : "studiolampor";
+          document.title = `Light Learner – ${numLightsOn} ${lampWord}`;
+        };
+
+        // Funktion för att spela ett slumpmässigt ljud när lampan flyttas
+        const playRandomMoveSound = () => {
+          const randomIndex = Math.floor(Math.random() * moveSounds.length);
+          const randomSound = moveSounds[randomIndex];
+          randomSound.currentTime = 0; // Återställ ljudet för att börja om
+          randomSound.play();
+        };
+
+        // Funktion för att spela ett slumpmässigt ljud när lampan slås på/av
+        const playRandomToggleLightSound = () => {
+          const randomIndex = Math.floor(
+            Math.random() * toggleLightSounds.length
+          );
+          const randomSound = toggleLightSounds[randomIndex];
+          randomSound.currentTime = 0; // Återställ ljudet för att börja om
+          randomSound.play();
+        };
+
+        // Funktion för att slå på/av ljus
+        const toggleLight = (lightEntity) => {
+          const lightComponent = lightEntity.querySelector("a-light");
+          const isOn = lightComponent.getAttribute("intensity") > 0;
+          const animation = {
+            property: "intensity",
+            to: isOn ? 0 : 1.5,
+            dur: 250,
+          };
+          lightComponent.setAttribute("animation", animation);
+
+          // Uppdatera antalet tända lampor
+          numLightsOn = lights.filter(
+            (light) =>
+              light.obj.querySelector("a-light").getAttribute("intensity") > 0
+          ).length;
+
+          // Uppdatera flikens titel
+          updateTabTitle();
+
+          // Spela ljud när ljuset slås på/av
+          playRandomToggleLightSound();
+        };
+
+        // Funktion för att flytta valda lampan med animation
+        const moveLight = (lightEntity, position) => {
+          const currentY = lightEntity.object3D.position.y;
+          const targetPosition = { x: position.x, y: currentY, z: position.z };
+
+          // Lägg till animation på lampan
+          lightEntity.setAttribute("animation", {
+            property: "position",
+            to: targetPosition,
+            dur: 1000,
+            easing: "easeInOutQuad",
+          });
+
+          // Spela ett slumpmässigt ljud när lampan flyttas
+          playRandomMoveSound();
+        };
+
+        // Funktion för att rotera lampan
+        const rotateLight = (lightEntity, angle) => {
+          lightEntity.object3D.rotation.y += angle;
+          // Spela ljud när lampan roteras
+          playRandomMoveSound();
+        };
+
+        // Klickhändelser för lamporna
+        lights.forEach(({ obj }) => {
+          obj.addEventListener("click", () => {
+            selectedLight = obj;
+            toggleLight(obj); // Växla ljuset
+          });
+        });
+
+        // Flytta lampor vid klick på markplan
+        const plane = document.querySelector("a-plane");
+        plane.addEventListener("click", (event) => {
+          if (selectedLight) {
+            const hitPoint = event.detail.intersection.point;
+            moveLight(selectedLight, hitPoint);
+          }
+        });
+
+        // Hantera tangenttryckningar för att rotera lamporna
+        window.addEventListener("keydown", (event) => {
+          if (!selectedLight) return;
+
+          const rotationAngle = Math.PI / 12; // 30 grader
+
+          if (event.key === "q") {
+            rotateLight(selectedLight, rotationAngle); // Rotera moturs
+          } else if (event.key === "e") {
+            rotateLight(selectedLight, -rotationAngle); // Rotera medurs
+          }
+        });
+
+        // Lägg till eventlyssnare för knappen
+        toggleModeBtn.addEventListener("click", function () {
+          // Växla klassen mellan light mode och dark mode
+          document.body.classList.toggle("dark-mode");
+
+          // Spara läget i localStorage
+          const darkModeEnabled = document.body.classList.contains("dark-mode");
+          localStorage.setItem("darkMode", darkModeEnabled);
+
+          // Uppdatera knappen text baserat på läget
+          if (darkModeEnabled) {
+            toggleModeBtn.textContent = "Light Mode";
+          } else {
+            toggleModeBtn.textContent = "Dark Mode";
+          }
+
+          // Hitta sky och ground-elementen
+          const sky = document.querySelector("a-sky");
+          const groundPlane = document.querySelector("#groundPlane");
+
+          // Uppdatera sky opacity beroende på mode
+          if (darkModeEnabled) {
+            sky.setAttribute("material", "opacity", "0.5");
+            // För markplanet (ground), sätt en mörkare färg i dark mode
+            groundPlane.setAttribute("material", "opacity", "0.5");
+            groundPlane.setAttribute("material", "color", "#121212"); // Mörk färg för dark mode
+          } else {
+            sky.setAttribute("material", "opacity", "0.5");
+            // För markplanet (ground), sätt en ljusare färg i light mode
+            groundPlane.setAttribute("material", "opacity", "0.5");
+            groundPlane.setAttribute("material", "color", "#ffffff"); // Ljus färg för light mode
+          }
+        });
+
+        // Initial uppdatering av titeln
+        updateTabTitle();
       });
-    }
-  };
-
-  // Huvudet klickhändelse
-  const headObj = document.querySelector("#headObj");
-  headObj.addEventListener("click", () => {
-    console.log("Huvudet klickades!"); // Felsökning: logga när huvudet klickas
-    playRandomHeadSound();
-  });
-
-  // När startknappen klickas
-  startButton.addEventListener("click", function () {
-    // Dölj startskärmen och visa scenen
-    startScreen.style.display = "none";
-    aScene.style.display = "block";
-
-    // Starta bakgrundsmusik
-    backgroundMusic.play();
-  });
-
-  // Ljus och lampor logik
-  const lights = [
-    { obj: document.querySelector("#light1Obj") },
-    { obj: document.querySelector("#light2Obj") },
-    { obj: document.querySelector("#light3Obj") },
-    { obj: document.querySelector("#light4Obj") },
-  ];
-
-  const moveSounds = [
-    document.querySelector("#moveSound1"),
-    document.querySelector("#moveSound2"),
-    document.querySelector("#moveSound3"),
-  ];
-  const toggleLightSounds = [
-    document.querySelector("#toggleLightSound1"),
-    document.querySelector("#toggleLightSound2"),
-    document.querySelector("#toggleLightSound3"),
-  ];
-
-  let selectedLight = null;
-  let numLightsOn = 0; // Håll koll på antalet tända lampor
-
-  // Funktion för att uppdatera flikens titel
-  const updateTabTitle = () => {
-    const lampWord = numLightsOn === 1 ? "studiolamp" : "studiolampor";
-    document.title = `Light Learner – ${numLightsOn} ${lampWord}`;
-  };
-
-  // Funktion för att spela ett slumpmässigt ljud när lampan flyttas
-  const playRandomMoveSound = () => {
-    const randomIndex = Math.floor(Math.random() * moveSounds.length);
-    const randomSound = moveSounds[randomIndex];
-    randomSound.currentTime = 0; // Återställ ljudet för att börja om
-    randomSound.play();
-  };
-
-  // Funktion för att spela ett slumpmässigt ljud när lampan slås på/av
-  const playRandomToggleLightSound = () => {
-    const randomIndex = Math.floor(
-      Math.random() * toggleLightSounds.length
-    );
-    const randomSound = toggleLightSounds[randomIndex];
-    randomSound.currentTime = 0; // Återställ ljudet för att börja om
-    randomSound.play();
-  };
-
-  // Funktion för att slå på/av ljus
-  const toggleLight = (lightEntity) => {
-    const lightComponent = lightEntity.querySelector("a-light");
-    const isOn = lightComponent.getAttribute("intensity") > 0;
-    const animation = {
-      property: "intensity",
-      to: isOn ? 0 : 1.5,
-      dur: 250,
-    };
-    lightComponent.setAttribute("animation", animation);
-
-    // Uppdatera antalet tända lampor
-    numLightsOn = lights.filter(light => light.obj.querySelector("a-light").getAttribute("intensity") > 0).length;
-
-    // Uppdatera flikens titel
-    updateTabTitle();
-
-    // Spela ljud när ljuset slås på/av
-    playRandomToggleLightSound();
-  };
-
-  // Funktion för att flytta valda lampan med animation
-  const moveLight = (lightEntity, position) => {
-    const currentY = lightEntity.object3D.position.y;
-    const targetPosition = { x: position.x, y: currentY, z: position.z };
-
-    // Lägg till animation på lampan
-    lightEntity.setAttribute("animation", {
-      property: "position",
-      to: targetPosition,
-      dur: 1000,
-      easing: "easeInOutQuad",
-    });
-
-    // Spela ett slumpmässigt ljud när lampan flyttas
-    playRandomMoveSound();
-  };
-
-  // Funktion för att rotera lampan
-  const rotateLight = (lightEntity, angle) => {
-    lightEntity.object3D.rotation.y += angle;
-    // Spela ljud när lampan roteras
-    playRandomMoveSound();
-  };
-
-  // Klickhändelser för lamporna
-  lights.forEach(({ obj }) => {
-    obj.addEventListener("click", () => {
-      selectedLight = obj;
-      toggleLight(obj); // Växla ljuset
-    });
-  });
-
-  // Flytta lampor vid klick på markplan
-  const plane = document.querySelector("a-plane");
-  plane.addEventListener("click", (event) => {
-    if (selectedLight) {
-      const hitPoint = event.detail.intersection.point;
-      moveLight(selectedLight, hitPoint);
-    }
-  });
-
-  // Hantera tangenttryckningar för att rotera lamporna
-  window.addEventListener("keydown", (event) => {
-    if (!selectedLight) return;
-
-    const rotationAngle = Math.PI / 12; // 30 grader
-
-    if (event.key === "q") {
-      rotateLight(selectedLight, rotationAngle); // Rotera moturs
-    } else if (event.key === "e") {
-      rotateLight(selectedLight, -rotationAngle); // Rotera medurs
-    }
-  });
-
-  // Lägg till eventlyssnare för knappen
-  toggleModeBtn.addEventListener("click", function () {
-    // Växla klassen mellan light mode och dark mode
-    document.body.classList.toggle("dark-mode");
-
-    // Spara läget i localStorage
-    const darkModeEnabled = document.body.classList.contains("dark-mode");
-    localStorage.setItem("darkMode", darkModeEnabled);
-
-    // Uppdatera knappen text baserat på läget
-    if (darkModeEnabled) {
-      toggleModeBtn.textContent = "Light Mode";
-    } else {
-      toggleModeBtn.textContent = "Dark Mode";
-    }
-
-    // Hitta sky och ground-elementen
-    const sky = document.querySelector('a-sky');
-    const groundPlane = document.querySelector('#groundPlane');
-
-    // Uppdatera sky opacity beroende på mode
-    if (darkModeEnabled) {
-      sky.setAttribute('material', 'opacity', '0.5');
-      // För markplanet (ground), sätt en mörkare färg i dark mode
-      groundPlane.setAttribute('material', 'opacity', '0.5');
-      groundPlane.setAttribute('material', 'color', '#121212'); // Mörk färg för dark mode
-    } else {
-      sky.setAttribute('material', 'opacity', '0.5');
-      // För markplanet (ground), sätt en ljusare färg i light mode
-      groundPlane.setAttribute('material', 'opacity', '0.5');
-      groundPlane.setAttribute('material', 'color', '#ffffff'); // Ljus färg för light mode
-    }
-  });
-
-  // Initial uppdatering av titeln
-  updateTabTitle();
-});
-
     </script>
   </body>
 </html>
